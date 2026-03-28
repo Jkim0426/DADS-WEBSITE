@@ -21,13 +21,14 @@ function useRobustImage(basePath: string) {
   return { src, loaded, failed, onLoad, onError };
 }
 
+// 5 unique photos — no repeats
+// Grid layout: col 1 = tall (row-span-2), cols 2-3 = 2x2
 const ITEMS = [
-  { base: "/images/gallery-1", alt: "Residential swimming pool maintained by Ace Pool",  span: "col-span-1 row-span-2" },
-  { base: "/images/gallery-2", alt: "Pool equipment after professional service",           span: "col-span-1 row-span-1" },
-  { base: "/images/gallery-3", alt: "Backyard pool with perfect water balance",            span: "col-span-1 row-span-1" },
-  { base: "/images/gallery-4", alt: "Spa and pool combination",                            span: "col-span-1 row-span-1" },
-  { base: "/images/gallery-5", alt: "Pool pump and motor after service",                   span: "col-span-1 row-span-1" },
-  { base: "/images/gallery-6", alt: "Pool with premium lighting at dusk",                  span: "col-span-1 row-span-2" },
+  { base: "/images/gallery-1", alt: "Luxury pool at dusk maintained by Ace Pool",          span: "col-span-1 row-span-2" },
+  { base: "/images/gallery-2", alt: "Freeform pool with spa and blue tile",                 span: "col-span-1 row-span-1" },
+  { base: "/images/gallery-3", alt: "Backyard pool with outdoor kitchen and loungers",      span: "col-span-1 row-span-1" },
+  { base: "/images/gallery-4", alt: "Rectangular pool with brick border and garden",        span: "col-span-1 row-span-1" },
+  { base: "/images/gallery-5", alt: "Pool and spa combination serviced by Ace Pool",        span: "col-span-1 row-span-1" },
 ];
 
 function GalleryTile({
@@ -45,7 +46,7 @@ function GalleryTile({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.05 + index * 0.07 }}
+      transition={{ duration: 0.5, delay: 0.05 + index * 0.08 }}
       className={`relative overflow-hidden rounded-xl group ${item.span} ${loaded && !failed ? "cursor-pointer" : "cursor-default"}`}
       onClick={() => loaded && !failed && onOpen(src)}
       role={loaded && !failed ? "button" : undefined}
@@ -53,7 +54,7 @@ function GalleryTile({
       onKeyDown={(e) => e.key === "Enter" && loaded && !failed && onOpen(src)}
       aria-label={item.alt}
     >
-      {/* Placeholder — pure dark gradient, no text */}
+      {/* Placeholder */}
       <div
         className="absolute inset-0"
         style={{
@@ -64,14 +65,7 @@ function GalleryTile({
         }}
         aria-hidden="true"
       >
-        {/* Subtle water shimmer — purely decorative */}
-        <svg
-          className="absolute bottom-0 left-0 right-0 w-full opacity-20"
-          viewBox="0 0 400 60"
-          fill="none"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
+        <svg className="absolute bottom-0 left-0 right-0 w-full opacity-20" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0 35 Q100 15 200 35 Q300 55 400 35 L400 60 L0 60Z" fill="rgba(14,165,233,0.4)" />
           <path d="M0 45 Q100 25 200 45 Q300 65 400 45 L400 60 L0 60Z" fill="rgba(14,165,233,0.2)" />
         </svg>
@@ -92,7 +86,7 @@ function GalleryTile({
         />
       )}
 
-      {/* Hover overlay — no text, just darkening */}
+      {/* Hover overlay */}
       {loaded && !failed && (
         <div className="absolute inset-0 bg-navy/0 group-hover:bg-navy/25 transition-colors duration-300 pointer-events-none" />
       )}
@@ -123,29 +117,21 @@ export default function Gallery() {
           className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-10"
         >
           <div>
-            <p className="font-body text-[11px] font-semibold tracking-[0.14em] text-aqua/60 uppercase mb-3">
-              Our Work
-            </p>
+            <p className="font-body text-[11px] font-semibold tracking-[0.14em] text-aqua/60 uppercase mb-3">Our Work</p>
             <h2 className="font-display text-4xl sm:text-5xl font-bold text-white leading-tight">
               Pools We&apos;re{" "}
-              <span style={{
-                background: "linear-gradient(135deg,#14b8a6,#0ea5e9)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>
+              <span style={{ background: "linear-gradient(135deg,#14b8a6,#0ea5e9)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 Proud Of
               </span>
             </h2>
           </div>
           <p className="font-body text-sm text-white/38 max-w-xs leading-relaxed sm:text-right">
-            Every pool in our care gets the same attention — clean water,
-            running equipment, and a job done right.
+            Every pool in our care gets the same attention — clean water, running equipment, and a job done right.
           </p>
         </motion.div>
 
-        {/* Grid — pure photos, no text overlays */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 auto-rows-[200px] md:auto-rows-[220px]">
+        {/* 5-photo grid: tall left + 2x2 right */}
+        <div className="grid grid-cols-3 gap-3 auto-rows-[220px]">
           {ITEMS.map((item, i) => (
             <GalleryTile key={item.base} item={item} index={i} onOpen={setLightboxSrc} />
           ))}
@@ -156,32 +142,24 @@ export default function Gallery() {
       <AnimatePresence>
         {lightboxSrc && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             className="fixed inset-0 z-50 bg-black/92 flex items-center justify-center p-6"
             onClick={() => setLightboxSrc(null)}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Photo lightbox"
+            role="dialog" aria-modal="true" aria-label="Photo lightbox"
           >
             <button
               className="absolute top-5 right-5 text-white/50 hover:text-white p-2 transition-colors"
-              onClick={() => setLightboxSrc(null)}
-              aria-label="Close"
+              onClick={() => setLightboxSrc(null)} aria-label="Close"
             >
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
             <motion.img
-              initial={{ scale: 0.93, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.93, opacity: 0 }}
+              initial={{ scale: 0.93, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.93, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              src={lightboxSrc}
-              alt="Full-size pool photo"
+              src={lightboxSrc} alt="Full-size pool photo"
               className="max-w-5xl max-h-[86vh] w-full object-contain rounded-xl"
               onClick={(e) => e.stopPropagation()}
             />
