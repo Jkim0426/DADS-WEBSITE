@@ -1,93 +1,52 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 
-const GALLERY_ITEMS = [
-  {
-    src: "/images/gallery-1.jpg",
-    alt: "Crystal-clear swimming pool with pristine blue water",
-    span: "col-span-1 row-span-2",
-    label: "Residential Pool",
-  },
-  {
-    src: "/images/gallery-2.jpg",
-    alt: "Pool equipment after professional service",
-    span: "col-span-1 row-span-1",
-    label: "Equipment Service",
-  },
-  {
-    src: "/images/gallery-3.jpg",
-    alt: "Backyard pool with perfectly balanced water",
-    span: "col-span-1 row-span-1",
-    label: "Weekly Maintenance",
-  },
-  {
-    src: "/images/gallery-4.jpg",
-    alt: "Spa and pool combination",
-    span: "col-span-1 row-span-1",
-    label: "Spa & Pool",
-  },
-  {
-    src: "/images/gallery-5.jpg",
-    alt: "Pool pump and motor after service",
-    span: "col-span-1 row-span-1",
-    label: "Pump Service",
-  },
-  {
-    src: "/images/gallery-6.jpg",
-    alt: "Pool with premium lighting at dusk",
-    span: "col-span-1 row-span-2",
-    label: "Pool Lighting",
-  },
+const ITEMS = [
+  { src: "/images/gallery-1.jpg", alt: "Crystal-clear residential swimming pool", label: "Residential Pool",  span: "col-span-1 row-span-2" },
+  { src: "/images/gallery-2.jpg", alt: "Pool equipment after professional service",  label: "Equipment",       span: "col-span-1 row-span-1" },
+  { src: "/images/gallery-3.jpg", alt: "Backyard pool with perfect water balance",   label: "Maintenance",    span: "col-span-1 row-span-1" },
+  { src: "/images/gallery-4.jpg", alt: "Spa and pool combination",                   label: "Spa & Pool",     span: "col-span-1 row-span-1" },
+  { src: "/images/gallery-5.jpg", alt: "Pool pump and motor after service",           label: "Pump Service",   span: "col-span-1 row-span-1" },
+  { src: "/images/gallery-6.jpg", alt: "Pool with premium lighting at dusk",          label: "Pool Lighting",  span: "col-span-1 row-span-2" },
 ];
 
-// Placeholder gradient colors per slot when no image is available
-const PLACEHOLDER_GRADIENTS = [
-  "linear-gradient(160deg, #0a1e3c 0%, #0d2d52 50%, #0f3a68 100%)",
-  "linear-gradient(160deg, #081829 0%, #0c2540 100%)",
-  "linear-gradient(160deg, #0c2040 0%, #0f3060 100%)",
-  "linear-gradient(160deg, #091525 0%, #0a2238 100%)",
-  "linear-gradient(160deg, #0e2540 0%, #112e55 100%)",
-  "linear-gradient(160deg, #0a1c35 0%, #0d2a4d 50%, #103866 100%)",
-];
+const PLACEHOLDER_HUE = [210, 200, 215, 205, 198, 212];
 
-function GalleryImage({
-  item,
-  index,
-  onOpen,
-}: {
-  item: typeof GALLERY_ITEMS[0];
+function GalleryTile({ item, index, onOpen }: {
+  item: typeof ITEMS[0];
   index: number;
-  onOpen: (src: string) => void;
+  onOpen: (s: string) => void;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
+  const h = PLACEHOLDER_HUE[index];
 
   return (
     <motion.button
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, delay: 0.08 + index * 0.08 }}
-      className={`relative overflow-hidden rounded-xl group focus-visible:ring-2 focus-visible:ring-aqua cursor-pointer ${item.span}`}
-      onClick={() => !errored && onOpen(item.src)}
-      aria-label={`View: ${item.alt}`}
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, delay: 0.06 + index * 0.09 }}
+      className={`relative overflow-hidden rounded-xl group focus-visible:ring-2 focus-visible:ring-aqua ${item.span}`}
+      onClick={() => !errored && loaded && onOpen(item.src)}
+      aria-label={item.alt}
     >
-      {/* Placeholder */}
+      {/* CSS placeholder */}
       <div
-        className={`absolute inset-0 transition-opacity duration-500 ${loaded ? "opacity-0" : "opacity-100"}`}
-        style={{ background: PLACEHOLDER_GRADIENTS[index] }}
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(160deg, hsl(${h},60%,10%) 0%, hsl(${h},55%,14%) 50%, hsl(${h},50%,18%) 100%)`,
+          opacity: loaded ? 0 : 1,
+          transition: "opacity 0.8s ease",
+        }}
         aria-hidden="true"
       >
-        {/* Subtle pool wave pattern in placeholder */}
-        <svg className="absolute bottom-6 left-0 right-0 w-full opacity-15" viewBox="0 0 300 40" fill="none" stroke="white" strokeWidth="1" aria-hidden="true">
-          <path d="M0 25 Q37 10 75 25 Q112 40 150 25 Q187 10 225 25 Q262 40 300 25" />
-          <path d="M0 33 Q37 18 75 33 Q112 48 150 33 Q187 18 225 33 Q262 48 300 33" />
+        <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 300 300" fill="none" preserveAspectRatio="xMidYMid slice">
+          <path d="M0 200 Q75 170 150 200 Q225 230 300 200 L300 300 L0 300Z" fill="rgba(14,165,233,0.3)" />
+          <path d="M0 220 Q75 190 150 220 Q225 250 300 220 L300 300 L0 300Z" fill="rgba(14,165,233,0.2)" />
         </svg>
-        {/* Label in placeholder */}
-        <div className="absolute bottom-4 left-4">
-          <span className="font-body text-[10px] tracking-widest text-white/40 uppercase">{item.label}</span>
-        </div>
+        <span className="absolute bottom-4 left-4 font-body text-[10px] tracking-widest text-white/30 uppercase">{item.label}</span>
       </div>
 
       {/* Real image */}
@@ -95,92 +54,95 @@ function GalleryImage({
       <img
         src={item.src}
         alt={item.alt}
-        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.04] ${loaded ? "opacity-100" : "opacity-0"}`}
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+        style={{ opacity: loaded && !errored ? 1 : 0, transition: "opacity 0.8s ease" }}
         onLoad={() => setLoaded(true)}
         onError={() => setErrored(true)}
         loading="lazy"
       />
 
       {/* Hover overlay */}
-      {!errored && (
-        <div className="absolute inset-0 bg-navy/0 group-hover:bg-navy/35 transition-all duration-400 flex items-end p-4">
-          <div className="translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-            <span className="font-body text-xs font-medium text-white/90 tracking-wide">{item.label}</span>
-          </div>
-        </div>
-      )}
+      <div className="absolute inset-0 bg-navy/0 group-hover:bg-navy/30 transition-colors duration-400 pointer-events-none" />
 
-      {/* Expand icon on hover */}
-      {!errored && (
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="bg-white/15 backdrop-blur-sm rounded-lg p-2">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-            </svg>
-          </div>
-        </div>
-      )}
+      {/* Label on hover */}
+      <div className="absolute bottom-0 inset-x-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+        <span className="font-body text-xs font-medium text-white/90 tracking-wide">{item.label}</span>
+      </div>
     </motion.button>
   );
 }
 
 export default function Gallery() {
-  const ref = useRef(null);
+  const ref    = useRef<HTMLElement>(null);
+  const bgRef  = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [lightbox, setLightbox] = useState<string | null>(null);
+
+  // Parallax on section bg
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
 
   return (
     <section
       id="gallery"
       ref={ref}
       aria-label="Pool photo gallery"
-      className="py-24 sm:py-32 bg-navy relative overflow-hidden"
+      className="relative py-24 sm:py-32 overflow-hidden"
+      style={{ background: "#081529" }}
     >
-      {/* Subtle background depth */}
-      <div
-        className="absolute inset-0 opacity-40"
-        style={{
-          background: "radial-gradient(ellipse at 65% 25%, rgba(3,105,161,0.18) 0%, transparent 55%)",
-        }}
+      {/* Parallax background layer */}
+      <motion.div
+        ref={bgRef}
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: bgY }}
         aria-hidden="true"
-      />
+      >
+        <svg className="w-full h-full opacity-25" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice" fill="none">
+          <path d="M0 420 Q180 380 360 420 Q540 460 720 420 Q900 380 1080 420 Q1260 460 1440 420 L1440 600 L0 600Z" fill="url(#galWater)" />
+          <path d="M0 460 Q200 420 400 460 Q600 500 800 460 Q1000 420 1200 460 L1440 460 L1440 600 L0 600Z" fill="rgba(14,165,233,0.06)" />
+          <defs>
+            <linearGradient id="galWater" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(3,105,161,0.15)" />
+              <stop offset="100%" stopColor="rgba(3,105,161,0.04)" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </motion.div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10">
 
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 22 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.65 }}
           className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12"
         >
           <div>
-            <p className="font-body text-[11px] font-semibold tracking-[0.15em] text-aqua/70 uppercase mb-4">
-              Our Work
-            </p>
+            <p className="font-body text-[11px] font-semibold tracking-[0.14em] text-aqua/65 uppercase mb-4">Our Work</p>
             <h2 className="font-display text-4xl sm:text-5xl font-bold text-white leading-tight">
               Pools We&apos;re{" "}
-              <span className="italic text-gradient-aqua">Proud Of</span>
+              <em className="not-italic text-gradient">Proud Of</em>
             </h2>
           </div>
-          <p className="font-body text-[0.9375rem] text-white/45 max-w-sm leading-relaxed sm:text-right">
-            Every pool in our care gets the same standard — from crystal-clear water
-            to flawlessly running equipment.
+          <p className="font-body text-[0.9375rem] text-white/40 max-w-xs leading-relaxed sm:text-right">
+            Every pool in our care gets the same attention to detail — clean water,
+            running equipment, and a job done right.
           </p>
         </motion.div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 auto-rows-[210px] md:auto-rows-[230px]">
-          {GALLERY_ITEMS.map((item, i) => (
-            <GalleryImage key={item.src} item={item} index={i} onOpen={setLightbox} />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 auto-rows-[200px] md:auto-rows-[220px]">
+          {ITEMS.map((item, i) => (
+            <GalleryTile key={item.src} item={item} index={i} onOpen={setLightbox} />
           ))}
         </div>
 
         <motion.p
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.8 }}
-          className="text-center font-body text-white/30 text-xs tracking-wide mt-8"
+          transition={{ delay: 0.9 }}
+          className="text-center font-body text-white/25 text-xs tracking-wide mt-8"
         >
           All photos are from real pools maintained by Ace Pool
         </motion.p>
@@ -190,32 +152,23 @@ export default function Gallery() {
       <AnimatePresence>
         {lightbox && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black/92 flex items-center justify-center p-6"
             onClick={() => setLightbox(null)}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Photo lightbox"
+            role="dialog" aria-modal="true" aria-label="Photo lightbox"
           >
             <button
-              className="absolute top-5 right-5 text-white/60 hover:text-white p-2 transition-colors"
-              onClick={() => setLightbox(null)}
-              aria-label="Close lightbox"
+              className="absolute top-5 right-5 text-white/50 hover:text-white p-2 transition-colors"
+              onClick={() => setLightbox(null)} aria-label="Close"
             >
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
             <motion.img
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              src={lightbox}
-              alt="Full-size pool photo"
+              initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              src={lightbox} alt="Full-size pool photo"
               className="max-w-5xl max-h-[85vh] w-full object-contain rounded-xl"
               onClick={(e) => e.stopPropagation()}
             />
