@@ -12,30 +12,21 @@ function useRobustImage(basePath: string) {
   const src = failed ? "" : `${basePath}${EXTENSIONS[extIndex] ?? ""}`;
   const onLoad = useCallback(() => setLoaded(true), []);
   const onError = useCallback(() => {
-    if (extIndex < EXTENSIONS.length - 1) {
-      setExtIndex((i) => i + 1);
-    } else {
-      setFailed(true);
-    }
+    if (extIndex < EXTENSIONS.length - 1) setExtIndex((i) => i + 1);
+    else setFailed(true);
   }, [extIndex]);
   return { src, loaded, failed, onLoad, onError };
 }
 
-// 5 unique photos — no repeats
-// Grid layout: col 1 = tall (row-span-2), cols 2-3 = 2x2
+// 4 unique photos — IMG_3044 first (tall left), 3 others right
 const ITEMS = [
-  { base: "/images/gallery-1", alt: "Luxury pool at dusk maintained by Ace Pool",          span: "col-span-1 row-span-2" },
-  { base: "/images/gallery-2", alt: "Freeform pool with spa and blue tile",                 span: "col-span-1 row-span-1" },
-  { base: "/images/gallery-3", alt: "Backyard pool with outdoor kitchen and loungers",      span: "col-span-1 row-span-1" },
-  { base: "/images/gallery-4", alt: "Rectangular pool with brick border and garden",        span: "col-span-1 row-span-1" },
-  { base: "/images/gallery-5", alt: "Pool and spa combination serviced by Ace Pool",        span: "col-span-1 row-span-1" },
+  { base: "/images/gallery-1", alt: "Luxury pool at dusk",                          span: "col-span-1 row-span-2" }, // tall left
+  { base: "/images/gallery-2", alt: "Freeform pool with spa and blue tile",          span: "col-span-1 row-span-1" },
+  { base: "/images/gallery-3", alt: "Rectangular pool with brick border and garden", span: "col-span-1 row-span-1" },
+  { base: "/images/gallery-4", alt: "Pool and spa combination",                      span: "col-span-1 row-span-2" }, // tall right
 ];
 
-function GalleryTile({
-  item,
-  index,
-  onOpen,
-}: {
+function GalleryTile({ item, index, onOpen }: {
   item: (typeof ITEMS)[0];
   index: number;
   onOpen: (src: string) => void;
@@ -46,7 +37,7 @@ function GalleryTile({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.05 + index * 0.08 }}
+      transition={{ duration: 0.5, delay: 0.05 + index * 0.09 }}
       className={`relative overflow-hidden rounded-xl group ${item.span} ${loaded && !failed ? "cursor-pointer" : "cursor-default"}`}
       onClick={() => loaded && !failed && onOpen(src)}
       role={loaded && !failed ? "button" : undefined}
@@ -65,7 +56,7 @@ function GalleryTile({
         }}
         aria-hidden="true"
       >
-        <svg className="absolute bottom-0 left-0 right-0 w-full opacity-20" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none" aria-hidden="true">
+        <svg className="absolute bottom-0 left-0 right-0 w-full opacity-20" viewBox="0 0 400 60" fill="none" preserveAspectRatio="none">
           <path d="M0 35 Q100 15 200 35 Q300 55 400 35 L400 60 L0 60Z" fill="rgba(14,165,233,0.4)" />
           <path d="M0 45 Q100 25 200 45 Q300 65 400 45 L400 60 L0 60Z" fill="rgba(14,165,233,0.2)" />
         </svg>
@@ -75,12 +66,8 @@ function GalleryTile({
       {!failed && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          key={src}
-          src={src}
-          alt={item.alt}
-          onLoad={onLoad}
-          onError={onError}
-          loading="lazy"
+          key={src} src={src} alt={item.alt}
+          onLoad={onLoad} onError={onError} loading="lazy"
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700"
           style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.7s ease" }}
         />
@@ -108,8 +95,6 @@ export default function Gallery() {
       style={{ background: "linear-gradient(180deg, #081529 0%, #0c1f3f 100%)" }}
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-10">
-
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -130,15 +115,14 @@ export default function Gallery() {
           </p>
         </motion.div>
 
-        {/* 5-photo grid: tall left + 2x2 right */}
-        <div className="grid grid-cols-3 gap-3 auto-rows-[220px]">
+        {/* 4-photo grid: tall left + 2 stacked middle + tall right */}
+        <div className="grid grid-cols-3 gap-3 auto-rows-[240px]">
           {ITEMS.map((item, i) => (
             <GalleryTile key={item.base} item={item} index={i} onOpen={setLightboxSrc} />
           ))}
         </div>
       </div>
 
-      {/* Lightbox */}
       <AnimatePresence>
         {lightboxSrc && (
           <motion.div
@@ -148,10 +132,7 @@ export default function Gallery() {
             onClick={() => setLightboxSrc(null)}
             role="dialog" aria-modal="true" aria-label="Photo lightbox"
           >
-            <button
-              className="absolute top-5 right-5 text-white/50 hover:text-white p-2 transition-colors"
-              onClick={() => setLightboxSrc(null)} aria-label="Close"
-            >
+            <button className="absolute top-5 right-5 text-white/50 hover:text-white p-2 transition-colors" onClick={() => setLightboxSrc(null)} aria-label="Close">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
